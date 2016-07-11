@@ -1,9 +1,12 @@
 ; z80dasm 1.1.3
 ; command line: z80dasm --labels --origin=63488 v9kz80.bin
 
+output: equ 02h
+input:  equ 03h
+
 	org	0f800h
 
-	jp lffc0h
+	jp init
 
 	db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -68,43 +71,51 @@
 	db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
-lffc0h:
+init:
 	ld hl,0efffh
 	ld sp,hl
-	ld de,0
-lffc7h:
-	in a,(03h)
+	ld de,0 				;DE = 0 (start address in RAM to write payload)
+
+wait:
+	in a,(input)
 	or a
-	jr nz,lffc7h
-	out (02h),a
-	call sub_ffe3h
-	ld c,a
-	call sub_ffe3h
-	ld b,a
-lffd6h:
-	call sub_ffe3h
-	ld (de),a
-	inc de
-	dec bc
+	jr nz,wait
+
+	out (output),a
+
+							;Read count of bytes in payload into BC
+	call read_byte 			;  Read low byte of count
+	ld c,a 					;  C = low byte
+	call read_byte 			;  Read high byte of count
+	ld b,a 					;  B = high byte
+
+loop:
+	call read_byte 			;Read next byte in payload
+	ld (de),a 				;Store it in RAM
+	inc de 					;Increment to next address in RAM
+	dec bc 					;Decrement bytes remaining in payload
+
 	ld a,b
 	or c
-	jr nz,lffd6h
-	jp 0
-sub_ffe3h:
-	in a,(03h)
-	and 40h
-	jr z,sub_ffe3h
-	in a,(03h)
+	jr nz,loop  			;Loop until BC = 0
+
+	jp 0 					;All bytes received.  Jump to address 0
+
+read_byte:
+	in a,(input)
+	and 01000000b
+	jr z,read_byte
+	in a,(input)
 	rld
-	ld a,20h
-	out (02h),a
-lfff1h:
-	in a,(03h)
-	and 40h
-	jr nz,lfff1h
-	in a,(03h)
+	ld a,00100000b
+	out (output),a
+rb1:
+	in a,(input)
+	and 01000000b
+	jr nz,rb1
+	in a,(input)
 	rld
 	xor a
-	out (02h),a
+	out (output),a
 	ld a,(hl)
 	ret
