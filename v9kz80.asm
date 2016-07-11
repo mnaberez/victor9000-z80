@@ -71,12 +71,12 @@
 lffc0h:
 	ld hl,0efffh
 	ld sp,hl
-	ld de,00000h
+	ld de,0
 lffc7h:
-	in a,(003h)
+	in a,(03h)
 	or a
 	jr nz,lffc7h
-	out (002h),a
+	out (02h),a
 	call sub_ffe3h
 	ld c,a
 	call sub_ffe3h
@@ -89,22 +89,22 @@ lffd6h:
 	ld a,b
 	or c
 	jr nz,lffd6h
-	jp 00000h
+	jp 0
 sub_ffe3h:
-	in a,(003h)
-	and 040h
+	in a,(03h)
+	and 40h
 	jr z,sub_ffe3h
-	in a,(003h)
+	in a,(03h)
 	rld
-	ld a,020h
-	out (002h),a
+	ld a,20h
+	out (02h),a
 lfff1h:
-	in a,(003h)
-	and 040h
+	in a,(03h)
+	and 40h
 	jr nz,lfff1h
-	in a,(003h)
+	in a,(03h)
 	rld
 	xor a
-	out (002h),a
+	out (02h),a
 	ld a,(hl)
 	ret
