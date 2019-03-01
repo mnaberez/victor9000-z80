@@ -74,7 +74,7 @@ input:  equ 03h
 init:
   ld hl,0efffh
   ld sp,hl
-  ld de,0         			;DE = 0 (start address in RAM to write payload)
+  ld de,0         	;DE = 0 (start address in RAM to write payload)
 
 wait:
   in a,(input)
@@ -83,23 +83,23 @@ wait:
 
   out (output),a
 
-              					;Read count of bytes in payload into BC
+              		;Read count of bytes in payload into BC
   call read_byte       	;  Read low byte of count
-  ld c,a           			;  C = low byte
+  ld c,a           	;  C = low byte
   call read_byte       	;  Read high byte of count
-  ld b,a           			;  B = high byte
+  ld b,a           	;  B = high byte
 
 loop:
   call read_byte       	;Read next byte in payload
-  ld (de),a         		;Store it in RAM
-  inc de           			;Increment to next address in RAM
-  dec bc           			;Decrement bytes remaining in payload
+  ld (de),a         	;Store it in RAM
+  inc de           	;Increment to next address in RAM
+  dec bc           	;Decrement bytes remaining in payload
 
   ld a,b
   or c
-  jr nz,loop        		;Loop until BC = 0
+  jr nz,loop        	;Loop until BC = 0
 
-  jp 0           				;All bytes received.  Jump to address 0
+  jp 0           	;All bytes received.  Jump to address 0
 
 read_byte:
   in a,(input)
