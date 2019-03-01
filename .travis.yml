@@ -1,0 +1,8 @@
+addons:
+  apt:
+    packages:
+      - z80asm
+
+script:
+  - make all
+
